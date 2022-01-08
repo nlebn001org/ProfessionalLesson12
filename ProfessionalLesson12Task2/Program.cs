@@ -6,36 +6,39 @@ namespace ProfessionalLesson12Task2
 {
     internal class Program
     {
-        static AutoResetEvent auto = new AutoResetEvent(false);
+        AutoResetEvent auto;
+
+        Program(string name, AutoResetEvent autoResetEvent)
+        {
+            Thread thread = new Thread(() => Function1()) { Name = name };
+            this.auto = autoResetEvent;
+            thread.Start();
+        }
 
         static void Main()
         {
-            Console.OutputEncoding = Encoding.Unicode;
-            new Thread(Function1).Start();
-            new Thread(Function2).Start();
+            AutoResetEvent are = new AutoResetEvent(false);
+            Program program = new Program("1", are);
+            are.WaitOne();
+            Console.WriteLine($"Main is currently managing this app.");
+            Program program2 = new Program("2", are);
+            are.WaitOne();
+            Console.WriteLine($"Main is currently managing this app.");
+        }
 
-            Thread.Sleep(500);  
-
-            Console.WriteLine("Нажмите на любую клавишу для перевода ManualResetEvent в сигнальное состояние.\n");
+        void Function1()
+        {
+            Console.WriteLine($"Not main thread with name {Thread.CurrentThread.Name} started.");
+            for (int i = 0; i < 20; i++)
+            {
+                Console.Write(". ");
+                Thread.Sleep(100);
+            }
+            Console.WriteLine($"\nNot main thread with name {Thread.CurrentThread.Name} ended.");
+            Console.WriteLine("Press any key to continue.");
             Console.ReadKey(true);
             auto.Set();
-            auto.Set();
-
-            Console.ReadKey();
         }
 
-        static void Function1()
-        {
-            Console.WriteLine("Поток 1 запущен и ожидает сигнала.");
-            auto.WaitOne();
-            Console.WriteLine("Поток 1 завершается.");
-        }
-
-        static void Function2()
-        {
-            Console.WriteLine("Поток 2 запущен и ожидает сигнала.");
-            auto.WaitOne();
-            Console.WriteLine("Поток 2 завершается.");
-        }
     }
 }
